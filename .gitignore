@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Expo & Mobile Build
+.expo/
+**/.expo/
+dist/
+**/dist/
+web-build/
+**/web-build/
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Java & Backend Build
+target/
+**/target/
+build/
+**/build/
+.gradle/
+**/.gradle/
+uploads/
+**/uploads/
+
+# IDE & OS
+.vscode/
+**/.vscode/
+.idea/
+**/.idea/
+.DS_Store
+Thumbs.db
+*.log
+**/*.log
+.settings/
+**/.settings/
+.classpath
+**/.classpath
+.project
+**/.project
+.factorypath
+**/.factorypath
+
+# Firebase Service Account Credentials (blocked by GitHub Push Protection)
+*serviceAccountKey*.json*
+**/*serviceAccountKey*.json*
