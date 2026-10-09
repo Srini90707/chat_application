@@ -14,6 +14,7 @@ import {
   validateOtp,
   validatePhone,
 } from '@/utils/validation';
+import { notificationService } from '@/services/notification/notificationService';
 import { authApi } from './authApi';
 
 // Mock storage for registered users in demo mode
@@ -51,24 +52,41 @@ class AuthService {
 
     const mobileNumber = phoneCheck.value;
 
+    // 1. Ensure push notification permissions & obtain token
+    let fcmToken: string | null = null;
+    try {
+      fcmToken = await notificationService.registerForPushNotificationsAsync(mobileNumber);
+    } catch {
+      // Continue even if initial registration encounters warning
+    }
+
     if (API_CONFIG.MOCK_AUTH) {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       mockAttempts.set(mobileNumber, 0);
       mockOtpExpiry.set(mobileNumber, Date.now() + 5 * 60 * 1000);
 
+      // Present instant push notification on the device with demo OTP
+      await notificationService.presentOtpNotification(API_CONFIG.MOCK_OTP_CODE);
+
       return {
         success: true,
-        message: 'OTP sent successfully to your mobile number.',
+        message: 'OTP sent successfully via push notification.',
         mobileNumber,
         cooldownSeconds: API_CONFIG.OTP_RESEND_COOLDOWN_SECONDS,
       };
     }
 
-    await authApi.generateOtp(mobileNumber);
+    const otpRes = await authApi.generateOtp(mobileNumber, fcmToken);
+
+    // Present instant push notification on the device with generated OTP
+    if (otpRes?.otp) {
+      await notificationService.presentOtpNotification(otpRes.otp);
+    }
+
     return {
       success: true,
-      message: 'OTP sent successfully to your mobile number.',
+      message: 'OTP sent successfully via push notification.',
       mobileNumber,
       cooldownSeconds: API_CONFIG.OTP_RESEND_COOLDOWN_SECONDS,
     };

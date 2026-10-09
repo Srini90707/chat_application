@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.88.8:8085',
+  BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.88.6:8085',
   TIMEOUT_MS: 15000,
   MOCK_AUTH: false,
   MOCK_OTP_CODE: '123456',

@@ -26,9 +26,13 @@ class AuthApi {
     );
   }
 
-  async generateOtp(number: string): Promise<BackendOtpDto> {
+  async generateOtp(number: string, fcmToken?: string | null): Promise<BackendOtpDto> {
+    const token = fcmToken || notificationService.getRegisteredToken() || undefined;
+    const path = `${AUTH_ENDPOINTS.OTP_GENERATE}/${encodeURIComponent(number)}`;
+    const url = token ? `${path}?fcmToken=${encodeURIComponent(token)}` : path;
+
     return apiClient.post<BackendOtpDto>(
-      `${AUTH_ENDPOINTS.OTP_GENERATE}/${encodeURIComponent(number)}`,
+      url,
       undefined,
       { requiresAuth: false }
     );

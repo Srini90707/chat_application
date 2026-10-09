@@ -15,7 +15,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://192.168.88.8:8085"
+        "EXPO_PUBLIC_API_URL": "http://192.168.88.6:8085"
       }
     },
     "production": {
@@ -24,7 +24,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://192.168.88.8:8085"
+        "EXPO_PUBLIC_API_URL": "http://192.168.88.6:8085"
       }
     }
   },

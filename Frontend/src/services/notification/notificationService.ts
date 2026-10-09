@@ -150,6 +150,81 @@ class NotificationService {
   getRegisteredToken(): string | null {
     return this.registeredToken;
   }
+
+  /**
+   * Triggers an instant high-priority push notification containing the OTP verification code.
+   */
+  async presentOtpNotification(otp: string): Promise<void> {
+    try {
+      if (!NotificationsModule) {
+        console.log('[NotificationService] Notifications module not available');
+        return;
+      }
+
+      // Ensure notification permissions
+      const { status: existingStatus } = await NotificationsModule.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await NotificationsModule.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== 'granted') {
+        console.warn('[NotificationService] Notification permission not granted');
+        return;
+      }
+
+      // Android notification channel setup
+      if (Platform.OS === 'android') {
+        await NotificationsModule.setNotificationChannelAsync('default', {
+          name: 'Chat Notifications',
+          importance: NotificationsModule.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#0284C7',
+          sound: 'default',
+        });
+      }
+
+      await NotificationsModule.scheduleNotificationAsync({
+        content: {
+          title: '💬 Verification Code',
+          body: `Your verification code is: ${otp}. Do not share this code with anyone.`,
+          data: { type: 'otp', otp },
+          sound: 'default',
+          priority: NotificationsModule.AndroidNotificationPriority.HIGH,
+        },
+        trigger: null, // deliver immediately
+      });
+
+      console.log(`[NotificationService] Push notification presented with OTP: ${otp}`);
+    } catch (err) {
+      console.warn('[NotificationService] Error presenting OTP notification:', err);
+    }
+  }
+
+  /**
+   * Listen for user tapping the OTP push notification
+   */
+  addNotificationResponseListener(callback: (otp: string) => void): (() => void) | undefined {
+    if (!NotificationsModule?.addNotificationResponseReceivedListener) {
+      return undefined;
+    }
+
+    try {
+      const subscription = NotificationsModule.addNotificationResponseReceivedListener((response) => {
+        const otp = response.notification.request.content.data?.otp;
+        if (otp && typeof otp === 'string') {
+          callback(otp);
+        }
+      });
+
+      return () => {
+        subscription.remove();
+      };
+    } catch {
+      return undefined;
+    }
+  }
 }
 
 export const notificationService = new NotificationService();

@@ -21,6 +21,7 @@ import { API_CONFIG } from '@/config/api';
 import { useAuth } from '@/hooks/useAuth';
 import { getErrorMessage } from '@/services/api/errorHandler';
 import { authService } from '@/services/auth/authService';
+import { notificationService } from '@/services/notification/notificationService';
 import { useTheme, useThemedStyles } from '@/theme';
 import { maskPhoneNumber } from '@/utils/phoneUtils';
 import { validateName, validateOtp } from '@/utils/validation';
@@ -94,6 +95,20 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
     [otp, mobileNumber, login, router, loading]
   );
 
+  // Listen for user tapping or receiving the push notification with OTP
+  useEffect(() => {
+    const unsubscribe = notificationService.addNotificationResponseListener((receivedOtp) => {
+      if (receivedOtp && receivedOtp.length === 6) {
+        setOtp(receivedOtp);
+        handleVerifyOtp(receivedOtp);
+      }
+    });
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, [handleVerifyOtp]);
+
   const handleCompleteRegistration = async () => {
     if (loading) return;
     setError(null);
@@ -152,7 +167,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
             <>
               <AuthHeader
                 title="Verify your number"
-                subtitle={`OTP sent to\n${maskPhoneNumber(mobileNumber)}`}
+                subtitle={`Verification code sent via push notification to\n${maskPhoneNumber(mobileNumber)}`}
                 onBack={() => router.back()}
               />
 
