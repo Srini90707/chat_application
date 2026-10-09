@@ -44,7 +44,7 @@ class StorageService {
     }
   }
 
-  private async deleteItem(key: string): Promise<void> {
+  async deleteItem(key: string): Promise<void> {
     try {
       if (Platform.OS === 'web') {
         if (typeof window !== 'undefined' && window.localStorage) {
