@@ -45,6 +45,14 @@
           "icon": "./assets/images/icon.png",
           "color": "#1E70EB"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
       ]
     ],
     "experiments": {

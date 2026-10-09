@@ -174,7 +174,7 @@ class ServerConfigService {
    * Tests reachability of candidate server URL
    * Non-destructive: Does NOT automatically save or persist the URL
    */
-  async testConnection(targetUrl: string, probeTimeoutMs: number = 3500): Promise<ConnectionTestResult> {
+  async testConnection(targetUrl: string, probeTimeoutMs: number = 6000): Promise<ConnectionTestResult> {
     const validation = this.validateUrl(targetUrl);
     if (!validation.isValid || !validation.normalizedUrl) {
       return {
@@ -198,6 +198,7 @@ class ServerConfigService {
     let reached = false;
     let lastStatus = 0;
     let hadTimeout = false;
+    let lastErrorMessage = '';
 
     for (const endpoint of probeEndpoints) {
       const controller = new AbortController();
@@ -222,8 +223,12 @@ class ServerConfigService {
         }
       } catch (err: unknown) {
         clearTimeout(timer);
-        if (err instanceof Error && err.name === 'AbortError') {
-          hadTimeout = true;
+        if (err instanceof Error) {
+          if (err.name === 'AbortError') {
+            hadTimeout = true;
+          } else {
+            lastErrorMessage = err.message;
+          }
         }
       }
     }
@@ -239,13 +244,15 @@ class ServerConfigService {
     if (hadTimeout) {
       return {
         success: false,
-        message: 'Connection timed out. Check Wi-Fi and server status.',
+        message: `Connection timed out (${baseUrl}). Check Wi-Fi connection.`,
       };
     }
 
     return {
       success: false,
-      message: 'Network request failed. Device and PC must be on the same Wi-Fi.',
+      message: lastErrorMessage
+        ? `Failed: ${lastErrorMessage} (${baseUrl})`
+        : `Network request failed to ${baseUrl}. Check Wi-Fi.`,
     };
   }
 

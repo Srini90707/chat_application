@@ -24,7 +24,7 @@ export function getErrorMessage(
       return 'Server is temporarily unavailable. Please try again later.';
     }
     if (error.code === 'NETWORK_ERROR') {
-      return 'Unable to connect to the server. Please check your internet connection.';
+      return error.message || 'Unable to connect to the server. Please check your internet connection.';
     }
     return error.message || defaultMessage;
   }

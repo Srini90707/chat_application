@@ -177,7 +177,7 @@ class ApiClient {
       }
 
       throw new ApiError(
-        'Unable to connect to the server. Please check your internet connection.',
+        `Unable to connect to server at ${this.baseUrl}. Please check your connection.`,
         0,
         'NETWORK_ERROR'
       );
